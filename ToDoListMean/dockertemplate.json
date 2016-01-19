@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
@@ -59,8 +59,8 @@
   "variables": {
     "location": "[parameters('deploymentLocation')]",
     "imagePublisher": "Canonical",
-    "imageOffer": "Ubuntu",
-    "imageSku": "Server",
+    "imageOffer": "UbuntuServer",
+    "imageSku": "14.04.2-LTS",
     "OSDiskName": "osdisk",
     "nicName": "myVnic",
     "addressPrefix": "10.0.0.0/24",
@@ -234,15 +234,19 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('vmName'),'/LinuxCustomScriptExtension')]",
-      "apiVersion": "2015-06-15",
-      "location": "variables('location')",
+      "name": "[concat(parameters('vmName'),'/installCustomScript')]",
+      "apiVersion": "2015-05-01-preview",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
+      ],
       "properties": {
         "publisher": "Microsoft.OSTCExtensions",
         "type": "CustomScriptForLinux",
         "typeHandlerVersion": "1.3",
         "settings": {
-          "commandToExecute": "curl -sL https://raw.githubusercontent.com/anjayajodha/ToDoListMean/master/ToDoListMean/meanstack.sh | bash"
+          "commandToExecute": "curl -sSL https://raw.githubusercontent.com/anjayajodha/ToDoListMean/master/ToDoListMean/docker.sh -o docker.sh",
+          "commandToExecute": "sh docker.sh"
         }
       }
     }

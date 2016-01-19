@@ -32,6 +32,8 @@
   <ItemGroup>
     <Compile Include="public\core.js" />
     <Compile Include="server.js" />
+    <Content Include="dockertemplate.json" />
+    <Content Include="testtemplate.json" />
     <Content Include="docker.sh" />
     <Content Include="meanstack.sh" />
     <Content Include="package.json" />
