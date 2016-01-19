@@ -57,7 +57,7 @@
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('networkSecurityGroupName')]",
-            "location": "[parameters('location')]",
+            "location": "[variables('location')]",
             "tags": {
                 "displayName": "NetworkSecurityGroup"
             },
