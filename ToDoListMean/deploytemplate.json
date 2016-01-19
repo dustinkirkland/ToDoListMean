@@ -242,7 +242,7 @@
         "type": "CustomScriptForLinux",
         "typeHandlerVersion": "1.3",
         "settings": {
-          "commandToExecute": ""
+          "commandToExecute": "curl -sL https://raw.githubusercontent.com/anjayajodha/ToDoListMean/master/ToDoListMean/meanstack.sh | bash"
         }
       }
     }
