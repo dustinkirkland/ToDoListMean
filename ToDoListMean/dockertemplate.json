@@ -59,8 +59,8 @@
   "variables": {
     "location": "[parameters('deploymentLocation')]",
     "imagePublisher": "Canonical",
-    "imageOffer": "UbuntuServer",
-    "imageSku": "14.04.2-LTS",
+    "imageOffer": "Ubuntu",
+    "imageSku": "Server",
     "OSDiskName": "osdisk",
     "nicName": "myVnic",
     "addressPrefix": "10.0.0.0/24",
