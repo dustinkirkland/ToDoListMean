@@ -20,7 +20,7 @@ service mongod start
 
 #Clone Repo
 
-git clone https://github.com/anjayajodha/ToDoListMean.git
+git clone https://github.com/anjayajodha/ToDoListMean.git /ToDoListMean
 
 cd /ToDoListMean/ToDoListMean/
 
