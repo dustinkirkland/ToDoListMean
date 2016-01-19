@@ -2,10 +2,45 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "newStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Name for the Storage Account where the Virtual Machine's disks will be placed."
+            }
+        },
+        "vmName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the VM."
+            }
+        },
+        "blobStorageEndpoint": {
+            "type": "string",
+            "defaultValue": "blob.azurestack.local",
+            "allowedValues": [
+                "blob.azurestack.local",
+                "blob.core.windows.net"
+            ],
+            "metadata": {
+                "description": "Blob storage endpoint"
+            }
+        },
+        "deploymentLocation": {
+            "type": "string",
+            "defaultValue": "local",
+            "allowedValues": [
+                "local",
+                "westus",
+                "eastus"
+            ],
+            "metadata": {
+                "description": "Blob storage endpoint"
+            }
+        },
         "adminUsername": {
             "type": "string",
             "metadata": {
-                "description": "User name for the Virtual Machine."
+                "description": "Username for the Virtual Machine."
             }
         },
         "adminPassword": {
@@ -13,48 +48,37 @@
             "metadata": {
                 "description": "Password for the Virtual Machine."
             }
+        },
+        "dnsNameForPublicIP": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
         }
     },
     "variables": {
-        "location": "local",
-        "OSDiskName": "osdiskforlinuxsimple",
-        "nicName": "myVMNic",
-        "addressPrefix": "10.0.0.0/16",
-        "subnetName": "meansubnet",
+        "location": "[parameters('deploymentLocation')]",
+        "imagePublisher": "Canonical",
+        "imageOffer": "Ubuntu",
+        "imageSku":  "Server",
+        "OSDiskName": "osdisk",
+        "nicName": "myVnic",
+        "addressPrefix": "10.0.0.0/24",
+        "subnetName": "mySubnet",
         "subnetPrefix": "10.0.0.0/24",
         "storageAccountType": "Standard_LRS",
-        "newStorageAccountName": "meanstorage",
-        "publicIPAddressName": "meanPublicIP",
+        "publicIPAddressName": "myPublicIP",
         "publicIPAddressType": "Dynamic",
         "vmStorageAccountContainerName": "vhds",
-        "vmName": "meanStackDemo",
         "vmSize": "Standard_A1",
-        "virtualNetworkName": "meanvnet",
-        "networkSecurityGroupName":  "meannsg",
+        "virtualNetworkName": "myVnet",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "networkSecurityGroupName": "mySG"
     },
     "resources": [
         {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('newStorageAccountName')]",
-            "apiVersion": "2015-06-15",
-            "location": "[variables('location')]",
-            "properties": {
-                "accountType": "[variables('storageAccountType')]"
-            }
-        },
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIPAddressName')]",
-            "location": "[variables('location')]",
-            "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }
-        },
-        {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkSecurityGroups",
             "name": "[variables('networkSecurityGroupName')]",
             "location": "[variables('location')]",
@@ -63,40 +87,51 @@
             },
             "properties": {
                 "securityRules": [
-                  {
-                    "name": "allow-http-access",
+                {
+                    "name": "rule1",
                     "properties": {
-                      "protocol": "*",
-                      "sourcePortRange": "*",
-                      "destinationPortRange": "8080",
-                      "sourceAddressPrefix": "*",
-                      "destinationAddressPrefix": "*",
-                      "access": "Allow",
-                      "priority": 100,
-                      "direction": "Inbound"
+                        "protocol": "*",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "*",
+                        "sourceAddressPrefix": "*",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": 101,
+                        "direction": "Inbound"
                     }
-                  },
-                  {
-                        "name": "allow-ssh",
-                        "properties": {
-                            "protocol": "*",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 1100,
-                            "direction": "Inbound"
-                        }
-                    }
+                }
                 ]
             }
         },
         {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[toLower(parameters('newStorageAccountName'))]",
             "apiVersion": "2015-06-15",
+            "location": "[variables('location')]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('publicIPAddressName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -107,14 +142,20 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                            }
                         }
                     }
-                ]
+                ],
+                "dhcpOptions": {
+                    "dnsServers": ["192.168.100.2"]
+                }
             }
         },
         {
-            "apiVersion": "2015-06-15",
+            "apiVersion": "2015-05-01-preview",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[variables('nicName')]",
             "location": "[variables('location')]",
@@ -123,6 +164,9 @@
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
             ],
             "properties": {
+                "dnsSettings": {
+                    "dnsServers": ["192.168.100.2"]
+                },
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
@@ -142,7 +186,7 @@
         {
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[variables('vmName')]",
+            "name": "[parameters('vmName')]",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName'))]",
@@ -153,21 +197,21 @@
                     "vmSize": "[variables('vmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[variables('vmName')]",
+                    "computerName": "[parameters('vmName')]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "Ubuntu",
-                        "sku": "Server",
-                        "version": "1.0.0"
+                        "publisher": "[variables('imagePublisher')]",
+                        "offer": "[variables('imageOffer')]",
+                        "sku": "[variables('imageSku')]",
+                        "version": "latest"
                     },
                     "osDisk": {
                         "name": "osdisk",
                         "vhd": {
-                            "uri": "[concat('http://',parameters('newStorageAccountName'),'.blob.azurestack.local/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+                            "uri": "[concat('http://',parameters('newStorageAccountName'),'.', parameters('blobStorageEndpoint'), '/', variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -183,7 +227,7 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": "true",
-                        "storageUri": "[concat('http://',parameters('newStorageAccountName'),'.blob.azurestack.local')]"
+                        "storageUri": "[concat('http://',parameters('newStorageAccountName'),'.', parameters('blobStorageEndpoint'))]"
                     }
                 }
             }
