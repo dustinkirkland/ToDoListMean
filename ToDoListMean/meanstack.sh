@@ -18,6 +18,8 @@ apt-get -qq install -y mongodb-org
 
 service mongod start
 
+echo "Done installing node and mongo"
+
 #Clone Repo
 
 git clone https://github.com/anjayajodha/ToDoListMean.git /ToDoListMean
