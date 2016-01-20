@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #Script runs as root, be careful!
 #Install node.js
 
