@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="public\core.js" />
     <Compile Include="server.js" />
+    <Content Include="dockerfilenoexit.sh" />
     <Content Include="dockertemplate.json" />
     <Content Include="testtemplate.json" />
     <Content Include="docker.sh" />
