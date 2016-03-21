@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "newStorageAccountName": {
+      "value" : "meanstoragea"
+    },
+    "vmName": {
+      "value": "meanstackdemoa"
+    },
+    "blobStorageEndpoint": {
+      "value" : "blob.azurestack.local"
+    },
+    "deploymentLocation": {
+      "value" : "local"
+    },
+    "adminUsername": {
+      "value" : "admin"
+    },
+    "adminPassword": {
+      "value" : "!!abc123"
+    },
+    "dnsNameForPublicIP": {
+      "value" : "meandemoa"
+    }
+  }
+}
