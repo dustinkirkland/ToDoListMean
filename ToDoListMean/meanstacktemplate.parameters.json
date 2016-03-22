@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "newStorageAccountName": {
-      "value" : "meanstoragea"
+      "value" : "meanstorage"
     },
     "vmName": {
-      "value": "meanstackdemoa"
+      "value": "meanstackdemo"
     },
     "blobStorageEndpoint": {
       "value" : "blob.azurestack.local"
@@ -21,7 +21,7 @@
       "value" : "!!abc123"
     },
     "dnsNameForPublicIP": {
-      "value" : "meandemoa"
+      "value" : "meandemo"
     }
   }
 }
